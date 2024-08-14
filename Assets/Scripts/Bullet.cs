@@ -10,7 +10,7 @@ public class Bullet : MonoBehaviour
         Enemy
     }
 
-    public BulletType bulletType; // Assign this in the inspector or through code
+    public BulletType bulletType; 
     public float speed = 10f;
     public int damage = 10;
     public int destructionTime = 10;
@@ -28,7 +28,6 @@ public class Bullet : MonoBehaviour
 
     void Update()
     {
-        // Move the bullet forward
         transform.Translate(Vector2.right * speed * Time.deltaTime);
     }
 
@@ -37,12 +36,11 @@ public class Bullet : MonoBehaviour
         // Handle collision based on bullet type
         if (bulletType == BulletType.Player && other.gameObject.layer == LayerMask.NameToLayer ("Enemy"))
         {
-            // Assume the enemy has a method to take damage
+            //ToDo Add firing enemies
             other.GetComponent<Enemy>().TakeDamage(damage);
         }
         else if (bulletType == BulletType.Enemy && other.CompareTag("Player"))
         {
-            // Assume the player has a method to take damage
             other.GetComponent<Player>().TakeDamage(damage);
         }else if (bulletType == BulletType.Player && other.CompareTag("Player")||(bulletType == BulletType.Enemy && other.gameObject.layer == LayerMask.NameToLayer ("Enemy")))
         {

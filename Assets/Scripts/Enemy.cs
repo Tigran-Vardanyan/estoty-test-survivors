@@ -85,32 +85,26 @@ public class Enemy : MonoBehaviour
     public void TakeDamage(float amount)
     {
         health -= amount;
-
-        // Change sprite to damageSprite when taking damage
-        if (damageSprite != null)
-        {
-
-            StartCoroutine(TakingDamagEffrct());
-        }
-
-        if (health <= 0)
-        {
-            StartCoroutine(Die());
-        }
+         StartCoroutine(TakingDamagEffrct());
     }
 
     private IEnumerator TakingDamagEffrct()
     {
-        if (damageSprite != null)
+        if (damageSprite != null && health >= 0)
         {
             animator.enabled = false;
             spriteRenderer.sprite = damageSprite;
+            yield return new WaitForSeconds(0.1f);
+            animator.enabled = true;
         }
-        yield return new WaitForSeconds(0.2f);
-        animator.enabled = true;
+        else
+        {
+            StartCoroutine(Die());
+        }
+       
     }
 
-    private IEnumerator  Die()
+    private IEnumerator Die()
     {
         gameObject.GetComponent<CapsuleCollider2D>().enabled = false;
         // Change sprite to deathSprite upon death
@@ -119,7 +113,8 @@ public class Enemy : MonoBehaviour
             animator.enabled = false;
             spriteRenderer.sprite = deathSprite;
         }
-       lootManager.SpawnLoot(gameObject.transform.position);
+
+        lootManager.SpawnLoot(gameObject.transform.position);
         yield return new WaitForSeconds(1);
         _player.AddKill();
         Destroy(gameObject);

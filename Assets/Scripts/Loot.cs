@@ -7,18 +7,18 @@ public class Loot : MonoBehaviour
     public LootType lootType;
     public int value;
 
-    private Player _player;
+    private Player player;
 
     [Inject]
-    public void Construct(Player player )
+    public void Construct(Player _player )
     {
-        _player = player;
+        player = _player;
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))
         {
-            ApplyLoot(_player);
+            ApplyLoot(player);
         }
     }
 
@@ -27,15 +27,15 @@ public class Loot : MonoBehaviour
         switch (lootType)
         {
             case LootType.ExperienceGem:
-                _player.AddExperience(value);
+                player.AddExperience(value);
                 Destroy(gameObject);
                 break;
             case LootType.HealthPotion:
-                _player.RestoreHealth(value);
+                player.RestoreHealth(value);
                 Destroy(gameObject);
                 break;
             case LootType.AmmoBox:
-                _player.RestoreAmmo(value);
+                player.RestoreAmmo(value);
                 Destroy(gameObject);
                 break;
         }

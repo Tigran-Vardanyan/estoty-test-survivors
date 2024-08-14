@@ -8,9 +8,13 @@ public class LootManager : MonoBehaviour
     public GameObject ammoBoxPrefab;
     public Transform spawnPoint;
     public float spawnRadius = 1.0f;
+    private Player player;
 
-    [SerializeField] private Player _player;
-
+    [Inject]
+    public void Construct(Player _player )
+    {
+        player = _player;
+    }
     public void SpawnLoot(Vector3 position)
     {
         LootType lootType = (LootType)Random.Range(0, 3);
@@ -38,7 +42,7 @@ public class LootManager : MonoBehaviour
 
             Vector3 lootPosition = position + randomOffset;
             GameObject lootObject = Instantiate(lootPrefab, lootPosition, Quaternion.identity, spawnPoint);
-            lootObject.GetComponent<Loot>().Construct(_player);
+            lootObject.GetComponent<Loot>().Construct(player);
         }
     }
 }

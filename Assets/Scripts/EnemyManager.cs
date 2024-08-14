@@ -9,9 +9,13 @@ public class EnemyManager : MonoBehaviour
     public float spawnRate = 2.0f;
     private float nextSpawnTime;
     private Camera mainCamera;
-    [SerializeField]private LootManager _lootManager;
+   private LootManager lootManager;
 
-    
+    [Inject]
+    public void Construct(LootManager _lootManager )
+    {
+        lootManager = _lootManager;
+    }
 
     private void Start()
     {
@@ -34,7 +38,8 @@ public class EnemyManager : MonoBehaviour
         {
             SpawnEnemy();
             nextSpawnTime = Time.time + spawnRate;
-            spawnRate *= 0.95f; // Increase spawn rate over time
+            // Increase spawn rate over time
+            spawnRate *= 0.98f; 
         }
     }
 
@@ -45,7 +50,7 @@ public class EnemyManager : MonoBehaviour
         Enemy newEnemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
 
         newEnemy.Construct(_player);
-        newEnemy.lootManager = _lootManager;
+        newEnemy.lootManager = lootManager;
     }
 
     private Vector3 GetRandomSpawnPosition()
@@ -53,7 +58,7 @@ public class EnemyManager : MonoBehaviour
         Vector3 spawnPosition = Vector3.zero;
 
         // Define how far outside the camera view the enemies should spawn
-        float distanceOutsideViewport = 0.1f; // Adjust this value to spawn enemies further away from the viewport
+        float distanceOutsideViewport = 0.1f; 
 
         // Randomly select a side to spawn the enemy from
         float screenX = 0f;
@@ -80,14 +85,12 @@ public class EnemyManager : MonoBehaviour
                 break;
         }
 
-        // Convert the viewport position to a world position, using the far clipping plane for z
+       
         spawnPosition = mainCamera.ViewportToWorldPoint(new Vector3(screenX, screenY, mainCamera.farClipPlane));
-
-        // Ensure the spawn position is on the same plane as the player (usually z = 0 in 2D games)
         spawnPosition.z = 0f;
 
         // Additional check to ensure the enemy doesn't spawn on top of the player
-        if (Vector3.Distance(spawnPosition, _player.transform.position) < 1f) // Adjust this distance as needed
+        if (Vector3.Distance(spawnPosition, _player.transform.position) < 1f) 
         {
             return GetRandomSpawnPosition(); // Recursively find a new position if too close to the player
         }

@@ -27,8 +27,8 @@ public class Player : MonoBehaviour
     private bool hasPoisonedBullets = false;
     private Rigidbody2D rb;
     private EnemyManager enemyManager;
-    [SerializeField] private UpgradeManager upgradeManager;
-    [SerializeField] private UIManager uiManager;
+    private UpgradeManager upgradeManager;
+    private UIManager uiManager;
     private LootManager lootManager;
 
     // Experience fields
@@ -37,6 +37,13 @@ public class Player : MonoBehaviour
     public int Level { get; private set; } = 1;
     public int CurrentAmmo => currentAmmo; 
     public int KillsCount { get; private set; } 
+    
+    [Inject]
+    public void Construct(UIManager _uiManager,UpgradeManager _upgradeManager )
+    {
+        uiManager = _uiManager;
+        upgradeManager = _upgradeManager;
+    }
     
 
     void Start()
@@ -67,7 +74,6 @@ public class Player : MonoBehaviour
         {
             gameObject.GetComponent<SpriteRenderer>().flipX = false;
         }
-        // Camera follows the player
         mainCamera.transform.position = new Vector3(transform.position.x, transform.position.y, mainCamera.transform.position.z);
     }
 
@@ -100,6 +106,7 @@ public class Player : MonoBehaviour
         if (Time.time < shootRate) return;
         if (currentAmmo <= 0)
         {
+            //TODO add out of ammo sound
             Debug.Log("Out of ammo!");
             return;
         }
@@ -108,7 +115,7 @@ public class Player : MonoBehaviour
         
         // Instantiate the bullet at the gun's position and rotation
         GameObject bullet = Instantiate(bulletPref.gameObject, gunTransform.position,gunTransform.rotation);
-
+        //TODO add shoot sound
         // Add force to the bullet in the direction the gun is facing
         Rigidbody2D rb = bullet.GetComponent<Rigidbody2D>();
         if (rb != null)
