@@ -79,7 +79,7 @@ SpriteRenderer:
   m_SortingOrder: 2
   m_Sprite: {fileID: 1544975445, guid: d33598d781682e049a53a0a13104ef29, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_FlipX: 1
+  m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
   m_Size: {x: 1, y: 1}
@@ -156,9 +156,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8b0270c12311934fb5ed75d6c4aacec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 15
+  health: 5
   damage: 10
-  speed: 3
+  speed: 1
   sprites:
   - {fileID: 1782705385, guid: d33598d781682e049a53a0a13104ef29, type: 3}
   - {fileID: 1544975445, guid: d33598d781682e049a53a0a13104ef29, type: 3}
@@ -168,6 +168,7 @@ MonoBehaviour:
   - {fileID: -595425931, guid: d33598d781682e049a53a0a13104ef29, type: 3}
   damageSprite: {fileID: -1523209149, guid: d33598d781682e049a53a0a13104ef29, type: 3}
   deathSprite: {fileID: 1253841367, guid: d33598d781682e049a53a0a13104ef29, type: 3}
+  lootManager: {fileID: 0}
 --- !u!1 &5536184416249278879
 GameObject:
   m_ObjectHideFlags: 0

@@ -3,15 +3,30 @@ using UnityEngine;
 
 public class GameInstaller : MonoInstaller
 {
-    public GameObject playerPrefab; 
-    public GameObject enemyManagerPrefab; 
-    public GameObject lootManagerPrefab;
-    public GameObject upgradeManagerPrefab; 
+   
+    public Player player;
+    public LootManager lootManager;
+    public EnemyManager enemyManager;
+    public UIManager uiManager;
+    public UpgradeManager upgradeManager;
+
     public override void InstallBindings()
     {
-        Container.Bind<Player>().FromComponentInNewPrefab(playerPrefab).AsSingle();
-        Container.Bind<EnemyManager>().FromComponentInNewPrefab(enemyManagerPrefab).AsSingle();
-        Container.Bind<LootManager>().FromComponentInNewPrefab(lootManagerPrefab).AsSingle();
-        Container.Bind<UpgradeManager>().FromComponentInNewPrefab(upgradeManagerPrefab).AsSingle();
+        Container.Bind<UpgradeManager>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<Player>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<LootManager>().FromComponentInHierarchy().AsSingle();
+        Container.Bind<EnemyManager>().FromComponentInHierarchy().AsSingle();
+
+
     }
+    [Inject]
+    public void Construct(EnemyManager enemyManager, UpgradeManager upgradeManager, LootManager lootManager,Player player)
+    {
+        
+        this.enemyManager = enemyManager;
+        this.upgradeManager = upgradeManager;
+        this.lootManager = lootManager;
+        this.player = player;
+    }
+
 }

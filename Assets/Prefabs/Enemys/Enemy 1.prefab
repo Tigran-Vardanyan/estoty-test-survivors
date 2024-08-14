@@ -240,7 +240,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8b0270c12311934fb5ed75d6c4aacec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  health: 4
+  health: 2
   damage: 2
   speed: 3
   sprites:
@@ -252,3 +252,4 @@ MonoBehaviour:
   - {fileID: -1524729577, guid: 3bcb7877229a5334da528f2f0872b5c3, type: 3}
   damageSprite: {fileID: 194153472, guid: 3bcb7877229a5334da528f2f0872b5c3, type: 3}
   deathSprite: {fileID: -2007313318, guid: 3bcb7877229a5334da528f2f0872b5c3, type: 3}
+  lootManager: {fileID: 0}

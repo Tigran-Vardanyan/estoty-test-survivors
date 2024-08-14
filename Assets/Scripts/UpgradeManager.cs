@@ -4,34 +4,70 @@ using Zenject;
 
 public class UpgradeManager : MonoBehaviour
 {
-    public List<Upgrade> availableUpgrades;
-    public int experiencePerLevel = 100;
+    private int currentExperience = 0;  
+    private int currentLevel = 0;       
+    
+    [SerializeField] private Player player;       
+    [SerializeField] private UIManager uiManager; 
 
-    private int currentExperience = 0;
-    private int currentLevel = 0;
-    private Player player;
-    private UIManager uiManager;
-
-    [Inject]
-    public void Construct(Player playerController, UIManager uiManager)
+    public enum UpgradeType
     {
-        this.uiManager = uiManager;
+        ShootRateIncrease,
+        MaxHealthIncrease,
+        MoveSpeedIncrease,
+        PoisonedBullets
     }
 
-    public void AddExperience(int amount)
+    public class Upgrade
     {
-        currentExperience += amount;
-        if (currentExperience >= experiencePerLevel)
+        public UpgradeType upgradeType;
+        public string upgradeDescription;
+        public float value;
+        [SerializeField] private UIManager _uiManager;
+
+        public Upgrade(UpgradeType upgradeType, string upgradeDescription, float value)
         {
-            currentExperience -= experiencePerLevel;
-            currentLevel++;
-            ApplyRandomUpgrade();
+            this.upgradeType = upgradeType;
+            this.upgradeDescription = upgradeDescription;
+            this.value = value;
         }
 
-        uiManager.UpdateExperienceBar();
+        public void ApplyUpgrade(Player player)
+        {
+            switch (upgradeType)
+            {
+                case UpgradeType.ShootRateIncrease:
+                    player.IncreaseShootRate(value);
+                    break;
+                case UpgradeType.MaxHealthIncrease:
+                    player.IncreaseMaxHealth(value);
+                    break;
+                case UpgradeType.MoveSpeedIncrease:
+                    player.IncreaseMoveSpeed(value);
+                    break;
+                case UpgradeType.PoisonedBullets:
+                    player.ApplyPoisonedBullets();
+                    break;
+            }
+        }
     }
 
-    private void ApplyRandomUpgrade()
+    private List<Upgrade> availableUpgrades = new List<Upgrade>
+    {
+        new Upgrade(UpgradeType.ShootRateIncrease, "Shoot Rate Increased!", 0.2f),
+        new Upgrade(UpgradeType.MaxHealthIncrease, "Max Health Increased!", 20f),
+        new Upgrade(UpgradeType.MoveSpeedIncrease, "Move Speed Increased!", 0.5f),
+        new Upgrade(UpgradeType.PoisonedBullets, "Poisoned Bullets Unlocked!", 0f) 
+    };
+
+    [Inject]
+    public void Construct(Player player)
+    {
+        this.player = player;
+    }
+
+    
+    public void ApplyRandomUpgrade()
     {
         if (availableUpgrades.Count == 0) return;
 

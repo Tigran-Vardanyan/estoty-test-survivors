@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using UnityEngine;
 using Zenject; // For Dependency Injection
@@ -21,28 +22,22 @@ public class Player : MonoBehaviour
 
     private int currentAmmo;
     private float currentHealth;
-    private float maxHealth = 100f; // Set initial maxHealth or load from player stats
-    private float shootRate = 0.2f; // Initial shoot rate
+    private float maxHealth = 100f; 
+    private float shootRate = 0.2f; 
     private bool hasPoisonedBullets = false;
     private Rigidbody2D rb;
     private EnemyManager enemyManager;
-    private UpgradeManager upgradeManager;
+    [SerializeField] private UpgradeManager upgradeManager;
+    [SerializeField] private UIManager uiManager;
     private LootManager lootManager;
 
     // Experience fields
     private int experience;
-    private int experienceToNextLevel = 100; // Set initial value or make configurable
+    private int experienceToNextLevel = 10; 
     public int Level { get; private set; } = 1;
-    public int CurrentAmmo => currentAmmo; // Property to access current ammo
-    public int KillsCount { get; private set; } // Property to track kills
-
-    [Inject]
-    public void Construct(EnemyManager enemyManager, UpgradeManager upgradeManager, LootManager lootManager)
-    {
-        this.enemyManager = enemyManager;
-        this.upgradeManager = upgradeManager;
-        this.lootManager = lootManager;
-    }
+    public int CurrentAmmo => currentAmmo; 
+    public int KillsCount { get; private set; } 
+    
 
     void Start()
     {
@@ -63,7 +58,15 @@ public class Player : MonoBehaviour
         Vector2 moveInput = new Vector2(joystick.Horizontal, joystick.Vertical);
         Vector2 moveVelocity = moveInput.normalized * moveSpeed;
         rb.velocity = moveVelocity;
-
+        //Flip Player depend on movement directory
+        if (moveInput.x<0)
+        {
+            gameObject.GetComponent<SpriteRenderer>().flipX = true;
+        }
+        else
+        {
+            gameObject.GetComponent<SpriteRenderer>().flipX = false;
+        }
         // Camera follows the player
         mainCamera.transform.position = new Vector3(transform.position.x, transform.position.y, mainCamera.transform.position.z);
     }
@@ -71,7 +74,7 @@ public class Player : MonoBehaviour
     void HandleShooting()
     {
         if (currentAmmo <= 0) return;
-
+        //Find enemy by Layer
         Collider2D[] enemiesInRange = Physics2D.OverlapCircleAll(transform.position, shootingRange, enemyLayer);
 
         if (enemiesInRange.Length > 0)
@@ -89,23 +92,18 @@ public class Player : MonoBehaviour
     {
         Vector2 direction = (target.position - gunTransform.position).normalized;
         gunTransform.right = direction;
-
-        // Implement shooting logic
         Shoot();
     }
 
     void Shoot()
     {
         if (Time.time < shootRate) return;
-
-        // Check if there's ammo
         if (currentAmmo <= 0)
         {
             Debug.Log("Out of ammo!");
             return;
         }
-
-        // Decrease ammo
+        
         currentAmmo--;
         
         // Instantiate the bullet at the gun's position and rotation
@@ -120,10 +118,6 @@ public class Player : MonoBehaviour
 
         // Update the shoot rate to limit the fire rate
         shootRate = Time.time + shootDelay;
-
-        // Log the shot for debugging purposes
-        Debug.Log("Shot fired! Remaining ammo: " + currentAmmo);
-    
     }
 
     void AttractLoot()
@@ -134,7 +128,7 @@ public class Player : MonoBehaviour
         {
             if (loot.CompareTag("Loot"))
             {
-                loot.transform.position = Vector2.MoveTowards(loot.transform.position, lootAttractorPoint.position, moveSpeed * Time.deltaTime);
+                loot.transform.position = Vector2.MoveTowards(loot.transform.position, lootAttractorPoint.position, moveSpeed*1.5f * Time.deltaTime);
             }
         }
     }
@@ -148,42 +142,9 @@ public class Player : MonoBehaviour
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, lootAttractionRange);
     }
+    
 
-    public void ApplyLoot(Loot loot)
-    {
-        switch (loot.lootType)
-        {
-            case LootType.ExperienceGem:
-                AddExperience(loot.value);
-                break;
-            case LootType.HealthPotion:
-                RestoreHealth(loot.value);
-                break;
-            case LootType.AmmoBox:
-                RestoreAmmo(loot.value);
-                break;
-        }
-    }
-
-    public void ApplyUpgrade(Upgrade upgrade)
-    {
-        switch (upgrade.upgradeType)
-        {
-            case UpgradeType.ShootRateIncrease:
-                IncreaseShootRate(upgrade.value);
-                break;
-            case UpgradeType.MaxHealthIncrease:
-                IncreaseMaxHealth(upgrade.value);
-                break;
-            case UpgradeType.MoveSpeedIncrease:
-                IncreaseMoveSpeed(upgrade.value);
-                break;
-            case UpgradeType.PoisonedBullets:
-                ApplyPoisonedBullets();
-                break;
-        }
-        Debug.Log("Received Upgrade: " + upgrade.upgradeType);
-    }
+   
 
     public void AddExperience(int amount)
     {
@@ -192,10 +153,9 @@ public class Player : MonoBehaviour
         if (experience >= experienceToNextLevel)
         {
             LevelUp();
+            
         }
-        
-        // Notify UIManager to update experience bar
-        FindObjectOfType<UIManager>().UpdateUI();
+        uiManager.UpdateUI();
     }
 
     private void LevelUp()
@@ -204,33 +164,31 @@ public class Player : MonoBehaviour
         experienceToNextLevel = Mathf.RoundToInt(experienceToNextLevel * 1.2f); // Increase difficulty
         Level++;
 
-        // Notify UIManager about level-up or trigger upgrade
+        upgradeManager.ApplyRandomUpgrade();
         FindObjectOfType<UIManager>().UpdateUI();
     }
 
     public void RestoreHealth(float amount)
     {
         currentHealth = Mathf.Clamp(currentHealth + amount, 0, maxHealth);
-        // Optionally update health UI
-        FindObjectOfType<UIManager>().UpdateUI();
+        uiManager.UpdateUI();
     }
 
     public void RestoreAmmo(int amount)
     {
         currentAmmo = Mathf.Clamp(currentAmmo + amount, 0, maxAmmo);
-        // Optionally update ammo UI
-        FindObjectOfType<UIManager>().UpdateUI();
+        uiManager.UpdateUI();
     }
 
     public void IncreaseShootRate(float amount)
     {
-        shootRate = Mathf.Max(0.1f, shootRate - amount); // Ensure shootRate doesn't go below a threshold
+        shootRate = Mathf.Max(0.1f, shootRate - amount); 
     }
 
     public void IncreaseMaxHealth(float amount)
     {
         maxHealth += amount;
-        currentHealth = maxHealth; // Optionally fully heal the player
+        currentHealth = maxHealth; 
     }
 
     public void IncreaseMoveSpeed(float amount)
@@ -241,7 +199,6 @@ public class Player : MonoBehaviour
     public void ApplyPoisonedBullets()
     {
         hasPoisonedBullets = true;
-        // Implement poisoned bullets logic, e.g., affecting enemy colors and applying periodic damage
     }
 
     public float GetExperienceNormalized()
@@ -257,18 +214,24 @@ public class Player : MonoBehaviour
     public void AddKill()
     {
         KillsCount++;
-        // Optionally notify UIManager about kill count
-        FindObjectOfType<UIManager>().UpdateUI();
+       
+        uiManager.UpdateUI();
     }
 
     public void Die()
     {
-        // Notify the UIManager or trigger death screen
-        FindObjectOfType<UIManager>().ShowDeathScreen();
+        uiManager.ShowDeathScreen();
+        enabled = false;
     }
 
     public void TakeDamage(int damage)
     {
+        currentHealth -= damage;
+        uiManager.UpdateUI();
         
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
     }
 }

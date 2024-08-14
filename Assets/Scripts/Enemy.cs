@@ -8,25 +8,27 @@ public class Enemy : MonoBehaviour
     public int damage;
     public float speed;
 
-    public Sprite[] sprites; // Array of sprites to choose from
-    public Sprite damageSprite; // Sprite to change to when taking damage
-    public Sprite deathSprite; // Sprite to change to upon death
+    public Sprite[] sprites;
+    public Sprite damageSprite;
+    public Sprite deathSprite; 
     public LootManager lootManager;
 
     private SpriteRenderer spriteRenderer;
-    private Transform player;
+    private Animator animator;
+    private Player _player;
     private bool isAttacking;
     
 
     [Inject]
-    public void Construct(Transform playerTransform )
+    public void Construct(Player player )
     {
-        player = playerTransform;
+        _player = player;
     }
 
     private void Start()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
+        animator = transform.GetComponent<Animator>();
         ChooseRandomSprite();
     }
 
@@ -46,27 +48,35 @@ public class Enemy : MonoBehaviour
 
     private void MoveTowardsPlayer()
     {
-        if (player == null) return;
+        if (health <= 0) return;
+            if ( _player == null) return;
 
-        Vector3 direction = (player.position - transform.position).normalized;
-        transform.position += direction * speed * Time.deltaTime;
-
-        if (Vector3.Distance(transform.position, player.position) < 1.5f && !isAttacking)
-        {
-            StartCoroutine(DealPeriodicDamage());
-        }
+            Vector3 direction = ( _player.transform.position - transform.position).normalized;
+            transform.position += direction * speed * Time.deltaTime;
+            if (direction.x<0)
+            {
+                gameObject.GetComponent<SpriteRenderer>().flipX = true;
+            }
+            else
+            {
+                gameObject.GetComponent<SpriteRenderer>().flipX = false;
+            }
+            if (Vector3.Distance(transform.position,  _player.transform.position) < 1.5f && !isAttacking)
+            {
+                StartCoroutine(DealPeriodicDamage());
+            }
     }
 
     private IEnumerator DealPeriodicDamage()
     {
         isAttacking = true;
 
-        while (Vector3.Distance(transform.position, player.position) < 1.5f)
+        while (Vector3.Distance(transform.position,  _player.transform.position) < 1.5f)
         {
             
-             player.GetComponent<Player>().TakeDamage(damage);
+            _player.GetComponent<Player>().TakeDamage(damage);
 
-            yield return new WaitForSeconds(1.0f); // Deal damage every second
+            yield return new WaitForSeconds(1.0f); 
         }
 
         isAttacking = false;
@@ -79,7 +89,8 @@ public class Enemy : MonoBehaviour
         // Change sprite to damageSprite when taking damage
         if (damageSprite != null)
         {
-            spriteRenderer.sprite = damageSprite;
+
+            StartCoroutine(TakingDamagEffrct());
         }
 
         if (health <= 0)
@@ -88,16 +99,29 @@ public class Enemy : MonoBehaviour
         }
     }
 
+    private IEnumerator TakingDamagEffrct()
+    {
+        if (damageSprite != null)
+        {
+            animator.enabled = false;
+            spriteRenderer.sprite = damageSprite;
+        }
+        yield return new WaitForSeconds(0.2f);
+        animator.enabled = true;
+    }
+
     private IEnumerator  Die()
     {
         gameObject.GetComponent<CapsuleCollider2D>().enabled = false;
         // Change sprite to deathSprite upon death
         if (deathSprite != null)
         {
+            animator.enabled = false;
             spriteRenderer.sprite = deathSprite;
         }
-       // lootManager.SpawnLoot(gameObject.transform.position);
+       lootManager.SpawnLoot(gameObject.transform.position);
         yield return new WaitForSeconds(1);
+        _player.AddKill();
         Destroy(gameObject);
     }
 }

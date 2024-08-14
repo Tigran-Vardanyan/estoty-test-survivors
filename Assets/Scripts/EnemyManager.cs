@@ -5,17 +5,13 @@ using Zenject;
 public class EnemyManager : MonoBehaviour
 {
     public List<Enemy> enemyPrefabs;
-    public Transform player;
+    public Player _player;
     public float spawnRate = 2.0f;
     private float nextSpawnTime;
     private Camera mainCamera;
-    [SerializeField]private LootManager lootManager;
+    [SerializeField]private LootManager _lootManager;
 
-    [Inject]
-    public void Construct(Transform playerTransform)
-    {
-        player = playerTransform;
-    }
+    
 
     private void Start()
     {
@@ -48,7 +44,8 @@ public class EnemyManager : MonoBehaviour
         Enemy enemyPrefab = enemyPrefabs[Random.Range(0, enemyPrefabs.Count)];
         Enemy newEnemy = Instantiate(enemyPrefab, spawnPosition, Quaternion.identity);
 
-        newEnemy.Construct(player);
+        newEnemy.Construct(_player);
+        newEnemy.lootManager = _lootManager;
     }
 
     private Vector3 GetRandomSpawnPosition()
@@ -90,7 +87,7 @@ public class EnemyManager : MonoBehaviour
         spawnPosition.z = 0f;
 
         // Additional check to ensure the enemy doesn't spawn on top of the player
-        if (Vector3.Distance(spawnPosition, player.position) < 1f) // Adjust this distance as needed
+        if (Vector3.Distance(spawnPosition, _player.transform.position) < 1f) // Adjust this distance as needed
         {
             return GetRandomSpawnPosition(); // Recursively find a new position if too close to the player
         }

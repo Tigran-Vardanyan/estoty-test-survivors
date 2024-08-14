@@ -44,9 +44,10 @@ public class Bullet : MonoBehaviour
         {
             // Assume the player has a method to take damage
             other.GetComponent<Player>().TakeDamage(damage);
+        }else if (bulletType == BulletType.Player && other.CompareTag("Player")||(bulletType == BulletType.Enemy && other.gameObject.layer == LayerMask.NameToLayer ("Enemy")))
+        {
+            return;
         }
-
-        // Destroy the bullet after hitting something
         Destroy(gameObject);
     }
 }

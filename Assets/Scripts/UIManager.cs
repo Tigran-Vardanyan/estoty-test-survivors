@@ -10,7 +10,8 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI ammoText;
     public TextMeshProUGUI killsText;
     public GameObject deathScreen;
-    public TextMeshProUGUI upgradeMessageText; // Add this for upgrade messages
+    public TextMeshProUGUI upgradeMessageText;
+    public TextMeshProUGUI level;
 
     [Header("Player Settings")]
     public Player player;
@@ -46,7 +47,9 @@ public class UIManager : MonoBehaviour
             ammoText.text = player.CurrentAmmo + "/" + player.maxAmmo;
 
             // Update Kills Counter
-            killsText.text = player.KillsCount.ToString(); 
+            killsText.text = player.KillsCount.ToString();
+
+            level.text = player.Level.ToString();
         }
     }
 
@@ -54,7 +57,7 @@ public class UIManager : MonoBehaviour
     {
         if (player != null)
         {
-            experienceBar.value = player.GetExperienceNormalized(); // Assuming you have this method
+            experienceBar.value = player.GetExperienceNormalized();
         }
     }
 
